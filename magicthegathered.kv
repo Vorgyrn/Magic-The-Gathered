@@ -16,6 +16,7 @@ WindManager:
 
         BoxLayout:
             orientation: "horizontal"
+
         BoxLayout:
             orientation: "horizontal"
 
@@ -48,17 +49,34 @@ WindManager:
                 text: 'Register New Cards/Trade'
                 on_release: 
                     app.root.current = "trade"
-                    root.manager.transition.direction = "left"
+                    root.manager.transition.direction = "left" 
+
                     
 
 
 <DeckPage>:
     name: "decks"
-    Button:
-        text: "Go Home"
-        on_release: 
-            app.root.current = "home"
-            root.manager.transition.direction = "left"
+
+    GridLayout:
+        size: root.width, root.height
+        cols: 2
+        rows: 1
+        
+        BoxLayout: 
+            orientation: "vertical"
+
+            Button:
+                text: "Go Home"
+                on_release: 
+                    app.root.current = "home"
+                    root.manager.transition.direction = "left"
+
+        BoxLayout:
+            orientation: "vertical"
+
+            Button:
+                
+    
 
 <NewPage>:
     name: "newdeck"
