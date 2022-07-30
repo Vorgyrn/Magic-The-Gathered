@@ -1,15 +1,31 @@
 sql tables and how info is going to be stored
 
+table:
 table for names deck lists: not cards just names and deck stats
-columns:
-    name(text)
-    price(real)
-    avg cmc(real)
-    instants(integer)
-    sorcerys(integer)
-    lands(integer)
-    creatures(integer)
-    artifcats(integer)
-    enchanmtents(integer)
-    plainswalkers(integer)
-    colors(text)
+    columns:
+        name(text)
+        price(real)
+        avg cmc(real)
+        instants(integer)
+        sorcerys(integer)
+        lands(integer)
+        creatures(integer)
+        artifcats(integer)
+        enchanmtents(integer)
+        plainswalkers(integer)
+        colors(text)
+
+table:
+for each deck table name will be the deck
+    columns:
+        card name(text)
+        universe id(text)
+        price(double)
+
+table:
+table for each location
+eg. green binder, red binder, blakc binder, 5 row box, 3 row box, kaladesh box....
+    columns:
+            card name(text)
+            universe id(text)
+            price(double)
