@@ -1,0 +1,15 @@
+sql tables and how info is going to be stored
+
+table for names deck lists: not cards just names and deck stats
+columns:
+    name(text)
+    price(real)
+    avg cmc(real)
+    instants(integer)
+    sorcerys(integer)
+    lands(integer)
+    creatures(integer)
+    artifcats(integer)
+    enchanmtents(integer)
+    plainswalkers(integer)
+    colors(text)
