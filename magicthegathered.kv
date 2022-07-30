@@ -1,0 +1,86 @@
+#:kivy 2.1.0
+WindManager:
+    HomePage:
+    DeckPage:
+    NewPage:
+    CollectionPage:
+    TradePage:
+
+<HomePage>:
+    name: "home"
+
+    GridLayout:
+        size: root.width, root.height
+        cols: 1
+        rows: 3
+
+        BoxLayout:
+            orientation: "horizontal"
+        BoxLayout:
+            orientation: "horizontal"
+
+            Button:
+                text: 'Deck Lists'
+                on_release: 
+                    app.root.current = "decks"
+                    root.manager.transition.direction = "right"
+
+            BoxLayout:
+                orientation: "horizontal"
+
+            Button:
+                text: 'New Deck'
+                on_release: 
+                    app.root.current = "newdeck"
+                    root.manager.transition.direction = "left"
+                    
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                text: 'Collection'
+                on_release: 
+                    app.root.current = "coll"
+                    root.manager.transition.direction = "right"
+            BoxLayout:
+                orientation: "horizontal"
+
+            Button:
+                text: 'Register New Cards/Trade'
+                on_release: 
+                    app.root.current = "trade"
+                    root.manager.transition.direction = "left"
+                    
+
+
+<DeckPage>:
+    name: "decks"
+    Button:
+        text: "Go Home"
+        on_release: 
+            app.root.current = "home"
+            root.manager.transition.direction = "left"
+
+<NewPage>:
+    name: "newdeck"
+    Button:
+        text: "Go Home"
+        on_release: 
+            app.root.current = "home"
+            root.manager.transition.direction = "right"
+
+<CollectionPage>:
+    name: "coll"
+    Button:
+        text: "Go Home"
+        on_release: 
+            app.root.current = "home"
+            root.manager.transition.direction = "left"
+            
+
+<TradePage>:
+    name: "trade"
+    Button:
+        text: "Go Home"
+        on_release: 
+            app.root.current = "home"
+            root.manager.transition.direction = "right"
