@@ -75,7 +75,21 @@ WindManager:
             orientation: "vertical"
 
             Button:
-                
+                # pos_hint: .90, .90
+                size_hint: 0.05, 0.05
+                on_release:
+                    app.root.current = "home"
+                    root.manager.transition.direcion = "left"
+
+                Image: 
+                    id: "home_icon"
+                    source: "Resources\Home_Icon.png"
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+                    size_hint: 0.05, .05
+
+
+
     
 
 <NewPage>:
