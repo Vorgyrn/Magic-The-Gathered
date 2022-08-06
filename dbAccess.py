@@ -36,3 +36,6 @@ def create_table(conn, table_name_info):
     except Error as e:
         print(e)
 
+class database:
+    def __init__(self):
+        

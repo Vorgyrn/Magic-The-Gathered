@@ -9,6 +9,10 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.config import Config
+
+Config.set('graphics', 'resizable', True)
+
 
 
 class HomePage(Screen):
