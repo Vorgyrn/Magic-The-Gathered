@@ -49,15 +49,28 @@ class ScryFallAPI:
 
 if __name__ == "__main__":
     cardAccess = ScryFallAPI()
-    value = cardAccess.getNamedCard(input("Enter a card to search: "))
-    if value != None:
-        for item in value:
-            print(item, value[item])
-        new_card = card.Card(value)
-        print(new_card.name, new_card.price)
+    option = input("Type 1 for card search or 2 for autofill: ")
+    if option == "1":
+        value = cardAccess.getNamedCard(input("Enter a card to search: "))
+        if value != None:
+            for item in value:
+                print(item, value[item])
+            new_card = card.Card(value)
+            print(new_card.name, new_card.price)
 
+        else:
+            print('error occurred', cardAccess.response.status_code)
+    elif option == "2":
+        value = cardAccess.getAutoComplete(input("Enter a string to suggest cards: "))
+        if value != None:
+            for item in value:
+                print(item, value[item])
+
+        else:
+            print('error occurred', cardAccess.response.status_code)
     else:
-        print('error occurred', cardAccess.response.status_code)
+        print("invalid input", option)
+
 
 
 

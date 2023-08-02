@@ -17,6 +17,7 @@ from kivy.properties import ObjectProperty, StringProperty
 import scryfall
 import card
 import dbAccess
+import time
 
 Config.set('graphics', 'resizable', True)
 
@@ -52,7 +53,7 @@ class ListAll(BoxLayout):
         decks = c.execute(''' SELECT name FROM decks ''')
         for deck in decks:
             item = Button(text=deck[0])
-            item.bind(on_press= self.chngSel)
+            item.bind(on_press=self.chngSel)
             self.add_widget(item)
 
     def fillWithCards(self):
@@ -87,7 +88,31 @@ class TradePage(Screen):
     2. make widget that gives suggestions like safran suggestion widget
     '''
     card_finder = scryfall.ScryFallAPI()
-    pass
+    keyPressTimer = 0
+
+    ''' Sets the value of the text box with the selllected reccomendation
+        1. instance: the button instance that was clicked
+    '''
+    def select_autofill(self, instance):
+        self.ids.input.text = instance.text
+        self.ids.recs.clear_widgets()
+
+    '''Populates reccomendations in the suggestion box by accessing scryfall api'''
+    def populate_suggestions(self):
+        if (time.time() - self.keyPressTimer) < 2:
+            return
+
+        sid = self.ids
+        sid.recs.clear_widgets()
+        jdata = self.card_finder.getAutoComplete(sid.input.text)
+
+        for i in range(len(jdata["data"])):
+            if i > 5:
+                return
+            btn = Button(text=jdata["data"][i])
+            btn.bind(on_press=self.select_autofill)
+            sid.recs.add_widget(btn)
+
 
 class HomePage(Screen):
     pass
@@ -98,7 +123,6 @@ class DeckListPage(Screen):
 
 class WindManager(ScreenManager):
     pass
-
 
 
 class MagicTheGathered(App):

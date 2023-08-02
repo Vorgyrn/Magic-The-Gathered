@@ -215,8 +215,10 @@ WindManager:
             text: "File Path:" if entry_method.text == "Bulk" else "Card:"
 
         TextInput:
+            id: input
             size_hint: .4, .07
             pos_hint: {'center_x':.6, 'center_y': .6}
+            on_text: root.populate_suggestions()
 
         Label:
             size_hint: .2, .07

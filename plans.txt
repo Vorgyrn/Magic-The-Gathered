@@ -1,6 +1,6 @@
 sql tables and how info is going to be stored
 
-table:
+table: decks
 table for names deck lists: not cards just names and deck stats
     columns:
         name(text)
@@ -15,17 +15,58 @@ table for names deck lists: not cards just names and deck stats
         plainswalkers(integer)
         colors(text)
 
-table:
+'''INSERT INTO decks (name, price, avg_cmc,
+            instants, sorcerys, lands,
+            creatures, artifacts, enchantments,
+            plainswakers, white, blue,
+            black, red, green)
+            VALUES ()'''
+
+'''CREATE TABLE decks
+(name text, price real, avg_cmc real,
+instants integer, sorcerys integer, lands integer,
+creatures integer, artifacts integer, enchantments integer,
+plainswakers integer, white integer, blue integer,
+black integer, red integer, green integer)'''
+
+
+table: "deck name"
 for each deck table name will be the deck
     columns:
         card name(text)
-        universe id(text)
-        price(double)
+        universe id(integer)
+        price(real)
 
-table:
-table for each location
-eg. green binder, red binder, blakc binder, 5 row box, 3 row box, kaladesh box....
-    columns:
-            card name(text)
-            universe id(text)
-            price(double)
+table: Collection
+for each card store this info
+    cardName text,
+    universeID integer,
+    foil bool,
+    alt_art bool,
+    price double,
+    location text
+
+
+
+
+Step 1: make an thing that can get a magic card and hold its info
+step 2: figure out how to make the data persistant betwen runs
+
+
+have connection status symbol somewhere on app to know internet can be accessed
+
+Classes:
+
+card:
+- all the typical mtg card stuff
+- cost
+- location in Collection
+
+
+deck:
+- deck format
+- restircitons to check to see if a card can be isnterted
+- # of cards
+- # of each type of card
+
+
