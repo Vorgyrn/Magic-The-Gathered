@@ -3,8 +3,11 @@ WindManager:
     HomePage:
     DeckPage:
     NewPage:
-    CollectionPage:
+    SearchPage:
     TradePage:
+    DeckListPage:
+    AdvSrchPage:
+    ResultsPage:
 
 <HomePage>:
     name: "home"
@@ -22,7 +25,7 @@ WindManager:
 
             Button:
                 text: 'Deck Lists'
-                on_release: 
+                on_release:
                     app.root.current = "decks"
                     root.manager.transition.direction = "right"
 
@@ -31,77 +34,243 @@ WindManager:
 
             Button:
                 text: 'New Deck'
-                on_release: 
+                on_release:
                     app.root.current = "newdeck"
                     root.manager.transition.direction = "left"
-                    
+
         BoxLayout:
             orientation: "horizontal"
             Button:
-                text: 'Collection'
-                on_release: 
-                    app.root.current = "coll"
+                text: 'Search Collection'
+                on_release:
+                    app.root.current = "srch"
                     root.manager.transition.direction = "right"
             BoxLayout:
                 orientation: "horizontal"
 
             Button:
                 text: 'Register New Cards/Trade'
-                on_release: 
+                on_release:
                     app.root.current = "trade"
-                    root.manager.transition.direction = "left" 
+                    root.manager.transition.direction = "left"
 
-                    
+
 
 
 <DeckPage>:
     name: "decks"
-
-    GridLayout:
+    selected_deck: list.sel_deck
+    BoxLayout:
+        orientation: "horizontal"
         size: root.width, root.height
-        cols: 2
-        rows: 1
-        
-        BoxLayout: 
-            orientation: "vertical"
-            HomeButton:
-                on_release:
-                    app.root.current = "home"
-                    root.manager.transition.direcion = "left"
-
 
         BoxLayout:
             orientation: "vertical"
+            id: deck_names
 
+            Label:
+                text: "Deck Lists"
+            ListAll:
+                id: list
 
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                size_hint_y: .15
+                orientation: "horizontal"
+                Label:
+                    text: "Selected: "
+                    size_hint_x: .25
+                Label:
+                    size_hint_x: .5
+                    text: root.selected_deck
+                HomeButton:
+                    size_hint_x: .25
+                    on_release:
+                        app.root.current = "home"
+                        root.manager.transition.direcion = "left"
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "Deck Operations"
+                Button:
+                    text: "View"
+                    on_press:
+                        app.root.current = "DeckList"
+                        root.manager.transition.direction = "down"
+                Button:
+                    text: "Add"
+                    on_press:
+                        app.root.current = "newdeck"
+                        root.manager.transition.direction = "down"
+                Button:
+                    text: "Edit"
+                Button:
+                    text: "Remove"
+
+<DeckListPage>:
+    name: "DeckList"
+    GridLayout:
+        cols: 2
+
+        NavMenu:
+            pos: root.width-self.width, root.height-self.height
+            size: .2,.2
+        Button:
+            text:'text'
 <NewPage>:
     name: "newdeck"
     HomeButton:
-        on_release: 
+        on_release:
             app.root.current = "home"
             root.manager.transition.direction = "right"
 
-<CollectionPage>:
-    name: "coll"
+
+<SearchPage>:
+    name: "srch"
+    FloatLayout:
+        size: root.width, root.height
+        HomeButton:
+            pos: root.width-self.width, root.height-self.height
+            size_hint: .15, .15
+            on_release:
+                app.root.current = "home"
+                root.manager.transition.direction = "left"
+
+        TextInput:
+            size_hint: .5, .07
+            pos_hint: {'center_x':.5, 'center_y': .6}
+        Spinner:
+            size_hint: .2, .07
+            pos_hint: {'center_x':.12, 'center_y': .6}
+            text: "Category"
+            values: 'Name', 'Color', 'Set', 'Rarity', 'Price'
+        Button:
+            text: "Advanced Search"
+            size_hint: .2, .07
+            pos_hint: {'center_x':.35, 'center_y': .5}
+            on_press:
+                app.prev_page = app.root.current
+                app.root.current = "advsrch"
+                root.manager.transition.direction = "down"
+        SrchBtn:
+            pos_hint: {'center_x':.87, 'center_y': .6}
+            size_hint: .2, .07
+
+<AdvSrchPage>:
+    name: "advsrch"
+    FloatLayout:
+        size: root.width, root.height
+        HomeButton:
+            id: "main"
+            pos: root.width-self.width, root.height-self.height
+            spacing: 5
+            size_hint: .15, .15
+            on_release:
+                app.root.current = "home"
+        Button:
+            text: "Back"
+            pos: 0, root.height-self.height
+            size_hint: .15, .15
+            on_release:
+                app.root.current = app.prev_page
+        Label:
+            text: "Under construction"
+            pos_hint: {'x':.5, 'y':.5}
+            size_hint: .5, .5
+
+        Button:
+            text: "Advanced Search"
+            size_hint: .2, .07
+            pos_hint: {'center_x':.35, 'center_y': .5}
+            on_press:
+                app.prev_page = app.root.current
+                app.root.current = "advsrch"
+                root.manager.transition.direction = "down"
+
+<ResultsPage>:
+    name: "resluts"
     HomeButton:
-        on_release: 
+        pos: root.width-self.width, root.height-self.height
+        size_hint: .15, .15
+        on_release:
             app.root.current = "home"
             root.manager.transition.direction = "left"
-            
 
 <TradePage>:
     name: "trade"
-    HomeButton:
-        on_release: 
-            app.root.current = "home"
-            root.manager.transition.direction = "right"
+    FloatLayout:
+        size: root.width, root.height
 
+        HomeButton:
+            pos: root.width-self.width, root.height-self.height
+            size_hint: .15, .15
+            on_release:
+                app.root.current = "home"
+                root.manager.transition.direction = "right"
+
+        Label:
+            size_hint: .2, .07
+            pos_hint: {'center_x':.3, 'center_y': .6}
+            text: "File Path:" if entry_method.text == "Bulk" else "Card:"
+
+        TextInput:
+            size_hint: .4, .07
+            pos_hint: {'center_x':.6, 'center_y': .6}
+
+        Label:
+            size_hint: .2, .07
+            pos_hint: {'center_x':.3, 'center_y': .5}
+            text: "Location:"
+
+        Spinner:
+            size_hint: .2, .07
+            pos_hint: {'center_x':.5, 'center_y': .5}
+            text: "Location"
+            values: 'TBD', 'ADD', 'FUNC', 'TO', 'POPULATE_OPTIONS'
+
+        Spinner:
+            size_hint: .2, .07
+            id: entry_method
+            pos_hint: {'center_x':.7, 'center_y': .5}
+            text: "Entry Method"
+            values: 'Single', 'Bulk'
+
+        StackLayout:
+			orientation: 'lr-tb'
+			size_hint: 1, .05
+			pos_hint: {'x':0, 'top':0.95}
+			Label:
+				text: 'Suggestions based on search:'
+				size_hint: .15, 1
+
+			GridLayout:
+				id: recs
+				cols: 6
+				rows: 1
+				size_hint: .85, 1
+				spacing: 5
+				padding: 5
 
 <HomeButton@Button>:
     background_normal: "Resources\Home_Icon.png"
     background_down: "Resources\inv_home.png"
-    
-            
-        
 
-        
+<NavMenu@Widget>:
+    orientation: "lr-tb"
+    spaceing: 5
+    padding: 5
+    HomeButton:
+        id: "main"
+        on_release:
+            app.root.current = "home"
+    Button:
+        text: "Back"
+        on_release:
+            app.root.current = "home"
+
+
+
+
+
+
