@@ -2,11 +2,14 @@
 
 class Card:
 
-    foil = False
-    art_treatment = "nomral"
     price = 0.0
+    art_treatment = "Normal"
+    # options: normal, showcase, extended
 
-    def __init__(self, cardData):
+    finish = "none"
+    # options none, foil, foil etch, other (step and conplete, surge, etc)
+
+    def __init__(self, cardData, foil="none", art="normal"):
         self.name = cardData["name"]
         self.image_urls = cardData["image_uris"]
         self.mana_cost = cardData["mana_cost"]
@@ -18,4 +21,13 @@ class Card:
         self.colors = cardData["colors"]
         self.keywords = cardData["keywords"]
         self.set_name = cardData["set_name"]
-        self.price = cardData["prices"]['usd']
+        if art == "normal":
+            if foil == "foil":
+                self.price = cardData["prices"]["usd_foil"]
+            elif foil == "none":
+                self.price = cardData["prices"]['usd_etched']
+            else:
+                self.price = cardData["prices"]['usd']
+
+    def __repr__(self) -> str:
+        return f"{self.name}: {self.type_line}, price: {self.price}"

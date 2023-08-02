@@ -2,6 +2,9 @@ import requests
 import card
 
 
+#TO DO: abstract away the use of scryfall api json data format
+#       and return the data in some form of object (card class etc)
+
 class ScryFallAPI:
     search_url = "https://api.scryfall.com/cards/search?"
     named_url = "https://api.scryfall.com/cards/named?"
@@ -29,6 +32,7 @@ class ScryFallAPI:
         else:
             return None
 
+    # add option to return a specified number of suggestions
     def getAutoComplete(self, partialName:str):
         self.response = requests.get(self.autocomplete_url + "q=" + partialName)
 

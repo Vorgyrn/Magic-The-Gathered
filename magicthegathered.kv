@@ -238,10 +238,19 @@ WindManager:
             text: "Entry Method"
             values: 'Single', 'Bulk'
 
+        Button:
+            size_hint: .2, .07
+			pos_hint: {'x':.8, 'top':.6}
+            text: "ADD"
+            on_press:
+                root.add_to_collection()
+                recs.clear_widgets()
+                input.text=""
+
         StackLayout:
 			orientation: 'lr-tb'
-			size_hint: 1, .05
-			pos_hint: {'x':0, 'top':0.95}
+			size_hint: 1, .1
+			pos_hint: {'x':0, 'top':.1}
 			Label:
 				text: 'Suggestions based on search:'
 				size_hint: .15, 1

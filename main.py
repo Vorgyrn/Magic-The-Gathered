@@ -113,6 +113,11 @@ class TradePage(Screen):
             btn.bind(on_press=self.select_autofill)
             sid.recs.add_widget(btn)
 
+    def add_to_collection(self):
+        new_card = card.Card(self.card_finder.getNamedCard(self.ids.input.text))
+        print(new_card)
+        # TO DO: add the card to the data base with concern to location(box/binder/deck)
+
 
 class HomePage(Screen):
     pass
