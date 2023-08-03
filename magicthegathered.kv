@@ -231,12 +231,23 @@ WindManager:
             text: "Location"
             values: 'TBD', 'ADD', 'FUNC', 'TO', 'POPULATE_OPTIONS'
 
-        Spinner:
+        Button:
             size_hint: .2, .07
             id: entry_method
-            pos_hint: {'center_x':.7, 'center_y': .5}
-            text: "Entry Method"
-            values: 'Single', 'Bulk'
+            pos_hint: {'center_x':.1, 'top': 1}
+            text: "Bulk Entry"
+
+        Label:
+            text: "Foiling:"
+            size_hint: .2, .07
+            pos_hint: {'center_x':.3, 'center_y': .4}
+
+        Spinner:
+            size_hint: .2, .07
+            pos_hint: {'center_x':.5, 'center_y': .4}
+            text: "None"
+            values: 'foil','etched'
+
 
         Button:
             size_hint: .2, .07

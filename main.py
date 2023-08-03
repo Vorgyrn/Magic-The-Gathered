@@ -75,11 +75,16 @@ class AdvSrchPage(Screen):
 class ResultsPage(Screen):
     pass
 
+
+# next steps: figure out how to serach for full art version of a card
+# might be just need to add a flag
 class TradePage(Screen):
     # considerations:
     '''
-    1. start with add to collection have locations set up
-    2. need a way to promt for if foil/
+    1. add foil check box
+    2. ditch single/buk entry
+    3. have a button that promts for a path to a csv file that will handle bulk entry
+    4.
 
     '''
     # test search suggestion:
@@ -99,7 +104,9 @@ class TradePage(Screen):
 
     '''Populates reccomendations in the suggestion box by accessing scryfall api'''
     def populate_suggestions(self):
-        if (time.time() - self.keyPressTimer) < 2:
+        if len(self.ids.input.text) > 2 and \
+            (time.time() - self.keyPressTimer) < 2:
+
             return
 
         sid = self.ids
@@ -114,8 +121,15 @@ class TradePage(Screen):
             sid.recs.add_widget(btn)
 
     def add_to_collection(self):
-        new_card = card.Card(self.card_finder.getNamedCard(self.ids.input.text))
-        print(new_card)
+        card_data = self.card_finder.search(self.ids.input.text)
+        if card_data["total_cards"] < 1:
+            pass
+        # TODO: Figure out how to handle multiple cards being returned from search
+        # look into: card ids, searching for frames, set
+        # each card should have all the right foil price info so dont worry about searching that
+
+        #new_card = card.Card()
+        #print(new_card)
         # TO DO: add the card to the data base with concern to location(box/binder/deck)
 
 

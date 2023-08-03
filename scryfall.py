@@ -1,6 +1,8 @@
 import requests
 import card
 
+import pdb
+
 
 #TO DO: abstract away the use of scryfall api json data format
 #       and return the data in some form of object (card class etc)
@@ -25,7 +27,15 @@ class ScryFallAPI:
     '''
     def getNamedCard(self, name:str, searchType="fuzzy"):
         #print(self.named_url + searchType + "=" + name)
-        self.response = requests.get(self.named_url + searchType + "=" + name)
+        self.response = requests.get(self.named_url + searchType + "=" + "++" + name)
+
+        if self.validateResponse():
+            return self.response.json()
+        else:
+            return None
+
+    def search(self, searchStr="", unique='prints',):
+        self.response = requests.get(self.search_url + "q=unique:" + unique + "+" + searchStr)
 
         if self.validateResponse():
             return self.response.json()
@@ -53,17 +63,20 @@ class ScryFallAPI:
 
 if __name__ == "__main__":
     cardAccess = ScryFallAPI()
-    option = input("Type 1 for card search or 2 for autofill: ")
+    option = input("Type 1 for card search, 2 for autofill or 3 for general surch: ")
     if option == "1":
         value = cardAccess.getNamedCard(input("Enter a card to search: "))
         if value != None:
             for item in value:
                 print(item, value[item])
             new_card = card.Card(value)
-            print(new_card.name, new_card.price)
+            print(new_card)
 
         else:
-            print('error occurred', cardAccess.response.status_code)
+            if cardAccess.response.status_code == 400:
+                print(cardAccess.response.json())
+            else:
+                print('error occurred', cardAccess.response.status_code)
     elif option == "2":
         value = cardAccess.getAutoComplete(input("Enter a string to suggest cards: "))
         if value != None:
@@ -72,6 +85,18 @@ if __name__ == "__main__":
 
         else:
             print('error occurred', cardAccess.response.status_code)
+    elif option == "3":
+        value = cardAccess.search(input("Enter search string: "))
+        if value != None:
+            for item in value["data"]:
+
+                #print(item)
+                new_card = card.Card(item)
+                pdb.set_trace()
+                print(new_card.price)
+        else:
+            print("no luck")
+
     else:
         print("invalid input", option)
 
