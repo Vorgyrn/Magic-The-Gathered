@@ -46,6 +46,20 @@ for each card store this info
     price double,
     location text
 
+table: locations
+
+table: big_box
+
+table: mid_box
+
+table: small_box
+
+table: red_binder
+
+table: green_binder
+
+table: black_binder
+
 
 
 

@@ -147,7 +147,7 @@ class WindManager(ScreenManager):
 class MagicTheGathered(App):
     prev_page = ObjectProperty(None)
     conn = dbAccess.create_connection(dbFile)
-    c = conn.cursor()
+
     def on_pause(self):
         self.conn.commit()
         self.conn.close()
