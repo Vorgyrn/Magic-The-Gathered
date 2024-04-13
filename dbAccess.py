@@ -1,17 +1,10 @@
-import sqlite3
-from sqlite3 import Error
-
-from pdb import set_trace
-
 import apsw
 import apsw.bestpractice
 
 apsw.bestpractice.apply(apsw.bestpractice.recommended)
 
 import os
-
-deckFile = r'db\decklists.db'
-magicInfo = r'db\magicinfo.db'
+from pdb import set_trace
 
 def check_table(conn, table_name):
     c = conn.cursor()
@@ -24,8 +17,9 @@ CREATE TABLE collection (
     collection_id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     cmc INTEGER NOT NULL,
+    mana_cost TEXT,
     set_name TEXT NOT NULL,
-    num INTEGER NOT NULL,
+    set_num INTEGER NOT NULL,
     type TEXT NOT NULL,
     rarity TEXT NOT NULL,
     price REAL NOT NULL,
@@ -34,13 +28,14 @@ CREATE TABLE collection (
     oracle TEXT,
     location INTEGER DEFAULT 1,
     loc_details TEXT,
+    foil INTEGER DEFAULT 0,
+    etched INTEGER DEFAULT 0,
     FOREIGN KEY (location)
     REFERENCES locations(location_id)
        ON UPDATE SET DEFAULT
        ON DELETE SET DEFAULT
 )
 '''
-
 DECKLIST_TABLE='''
 CREATE TABLE REPLACE_ME (
     name TEXT NOT NULL,
@@ -63,14 +58,14 @@ CREATE TABLE REPLACE_ME (
     REFERENCES collection (toughness)
        ON UPDATE SET CASCADE
        ON DELETE SET RESTRICT
-    set TEXT NOT NULL,
-    FOREIGN KEY (set)
-    REFERENCES collection (set)
+    set_name TEXT NOT NULL,
+    FOREIGN KEY (set_name)
+    REFERENCES collection (set_name)
        ON UPDATE SET CASCADE
        ON DELETE SET RESTRICT
-    num INTEGER NOT NULL,
-    FOREIGN KEY (num)
-    REFERENCES collection (num)
+    set_num INTEGER NOT NULL,
+    FOREIGN KEY (set_num)
+    REFERENCES collection (set_num)
        ON UPDATE SET CASCADE
        ON DELETE SET RESTRICT
     type TEXT NOT NOT,
@@ -184,12 +179,13 @@ class database:
         else:
             return False
 
-        # test if the db contains the correct tables
+
         self.connection = apsw.Connection(self.dbPath)
         check = self.connection.pragma("integrity_check")
         if check != "ok":
             raise Exception("Database Integrity Error:", check)
 
+        # test if the db contains the correct tables
         c = self.connection.cursor()
         reqs = ['locations', 'collection', 'decks']
         for req in reqs:
