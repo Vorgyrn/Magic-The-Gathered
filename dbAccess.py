@@ -1,3 +1,5 @@
+from Card import Card
+
 import apsw
 import apsw.bestpractice
 
@@ -14,7 +16,7 @@ def check_table(conn, table_name):
 
 COLLECTION_TABLE='''
 CREATE TABLE collection (
-    collection_id INTEGER PRIMARY KEY,
+    collection_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     cmc INTEGER NOT NULL,
     mana_cost TEXT,
@@ -119,7 +121,7 @@ CREATE TABLE decks (
 '''
 LOCATIONS_TABLE='''
 CREATE TABLE locations (
-    location_id INTEGER PRIMARY KEY,
+    location_id INTEGER PRIMARY KEY AUTOINCREMENT,
     location TEXT
 )
 '''
@@ -146,7 +148,6 @@ class database:
         if not self.validateDb():
             self.createNewDB()
 
-
     def createNewDB(self):
         '''Create a new database with the path that was provided.'''
         # check if the given path is a dir
@@ -162,6 +163,9 @@ class database:
         self.connection.pragma("foreign_keys", True)
         cursor = self.connection.cursor()
         cursor.execute(LOCATIONS_TABLE)
+        #query = "INSERT INTO locations (location) VALUES ('unknown');"
+        #cursor.execute(query)
+        self.addLocation('unknown')
         cursor.execute(COLLECTION_TABLE)
         cursor.execute(DECKS_TABLE)
 
@@ -197,10 +201,25 @@ class database:
         print("Database at: ", self.dbPath, "VALIDATED")
         return True
 
-    def addLocation(self, location):
-        query = "INSERT INTO locations values(?)"
+    def getLocationID(self, location):
+        query = f"SELECT location_id FROM locations WHERE location = '{location}';"
         c = self.connection.cursor()
-        c.execute(query, location)
+        res, = c.execute(query).fetchone()
+        return res
+
+    def addLocation(self, location):
+        query = "INSERT INTO locations (location) VALUES (?);"
+        c = self.connection.cursor()
+        c.execute(query, (location,))
+
+    def getLocations(self):
+        """getLocations:\n
+        :return: all the locations cards are stored at
+        """
+        query = 'SELECT * FROM locations;'
+        c = self.connection.cursor()
+        results = c.execute(query).fetchall()
+        return results
 
     def addDeck(self, name:str, commander:str, location=1, location_details=''):
         '''Add a deck to the decks table'''
@@ -213,20 +232,32 @@ class database:
         c = self.connection.cursor()
         c.execute(query, vals)
 
-    def add_card(self, card):
+    def addCard(self, card:Card):
         """Adds a new card card to the collection, if a deck is specified add
         the card to the deck as well.
 
         Args:
-            name (str): The exact name (not case sensative).
-            set (str): set the card is in (either set code or full set name).
-            num (int): The cards number within the set.
-            count (int): Amount of cards owned
-            location (str): place(s) the card(s) is stored, seperated by commas. If the location is a deck
-            name, the card will be added to the deck list.
-            foilType (str): foil, nonfoil, etched or glossy. Default to nonfoil
+            card: the card to add to the collection
         """
-        pass
+        # check if new location is needed
+        locs = [loc[1] for loc in self.getLocations()]
+        if card.location not in locs:
+            self.addLocation(card.location)
+
+        loc_id = self.getLocationID(card.location)
+        pnt = ""
+        q=""
+        if card.isCreature():
+            pnt = 'power, toughness, '
+            q = "?,?,"
+        query = f"""INSERT INTO collection
+                        (name, cmc, mana_cost, set_name, set_num, type,
+                        rarity, price, {pnt}oracle, location, loc_details,
+                        foil, etched)
+                        VALUES
+                        (?,?,?,?,?,?,?,?,{q}?,?,?,?,?)"""
+        c = self.connection.cursor()
+        c.execute(query, card.toDBFormat(loc_id))
 
     def add_to_deck(self, card):
         pass
@@ -259,13 +290,29 @@ class database:
     def entry_to_card(self, entry):
         pass
 
-    def get_card_locations(self):
-        """get_card_locations:\n
-        :return: all the locations cards are stored at
-        """
-        pass
+
+    # temporary testing func
+    def seeCollection(self):
+        query = "SELECT * from collection;"
+        c = self.connection.cursor()
+        res = c.execute(query).fetchall()
+        for r in res:
+            print(r)
 
 if __name__ == "__main__":
-
+    a = 'rb1'
+    data={'name':'Kaalia', 'cmc':4, 'mana_cost':'1{b}{w}{r}', 'set_name':'c14',
+          'collector_number':1, 'type_line':'Lengendary Creature - Human Cleric',
+          'rarity':'mythic', 'power':2, 'toughness':2, 'oracle_text':"Flying\n When this creature attacks put a demon, dragon, or angel onto the battlefield tapped and attacking.",
+          'colors':'WBR', 'prices':{'usd_foil':40.00, 'usd_etched':50.90, 'usd':20.69},
+          'image_uris':'none'}
+    kaalia = Card()
+    kaalia.fromJson(data, location=a)
+    print(kaalia.location)
     db = database('db\\collection.db')
+    print(db.getLocations())
+    db.addCard(kaalia)
+    #print(db.getLocationID('rup'))
+    db.seeCollection()
+
 
