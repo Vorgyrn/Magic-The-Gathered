@@ -1,21 +1,27 @@
 import requests
-import card
+from time import sleep
 
-import pdb
+from urllib.parse import quote
 
+import Card
+
+EQ='%3D'
+CL='%3A'
+PL='%2B'
 
 #TO DO: abstract away the use of scryfall api json data format
 #       and return the data in some form of object (card class etc)
 
 class ScryFallAPI:
-    search_url = "https://api.scryfall.com/cards/search?"
-    named_url = "https://api.scryfall.com/cards/named?"
-    autocomplete_url = "https://api.scryfall.com/cards/autocomplete?"
-    collection_url = "https://api.scryfall.com/cards/collection" #max of 75 cards pre request
+    base_url = "https://api.scryfall.com"
+    search_url = base_url + "/cards/search?q="
+    named_url = base_url + "/cards/named?"
+    autocomplete_url = base_url + "/cards/autocomplete?"
+    collection_url = base_url + "/cards/collection" #max of 75 cards per request
+    
 
     def __init__(self) -> None:
         self.response = None
-
 
     '''
     searches for a named card from the scryfall api
@@ -27,20 +33,21 @@ class ScryFallAPI:
     '''
     def getNamedCard(self, name:str, searchType="fuzzy"):
         #print(self.named_url + searchType + "=" + name)
-        self.response = requests.get(self.named_url + searchType + "=" + "++" + name)
+        self.response = requests.get(self.named_url + searchType + "=" +  name) #"++" +
 
         if self.validateResponse():
             return self.response.json()
         else:
             return None
 
-    def search(self, searchStr="", unique='prints',):
-        self.response = requests.get(self.search_url + "q=unique:" + unique + "+" + searchStr)
+    def search(self, searchStr=""):
+        
+        self.response = requests.get(self.search_url+searchStr) # quote( #  + "q=unique:" + unique + "+"
 
         if self.validateResponse():
-            return self.response.json()
-        else:
-            return None
+            return self.response.json()['data']
+        
+        return []
 
     # add option to return a specified number of suggestions
     def getAutoComplete(self, partialName:str):
@@ -58,6 +65,10 @@ class ScryFallAPI:
 
         if self.response.status_code == 200:
             return True
+        
+        # Too many requests too fast slow down a second
+        if self.response.status_code == 429:
+            sleep(0.1)
 
         return False
 
@@ -67,9 +78,9 @@ if __name__ == "__main__":
     if option == "1":
         value = cardAccess.getNamedCard(input("Enter a card to search: "))
         if value != None:
-            for item in value:
-                print(item, value[item])
-            new_card = card.Card(value)
+            ''' for item in value:
+                print(item, value[item]) '''
+            new_card = Card.Card(value)
             print(new_card)
 
         else:
@@ -87,13 +98,16 @@ if __name__ == "__main__":
             print('error occurred', cardAccess.response.status_code)
     elif option == "3":
         value = cardAccess.search(input("Enter search string: "))
+        cards = []
         if value != None:
             for item in value["data"]:
 
                 #print(item)
-                new_card = card.Card(item)
-                pdb.set_trace()
-                print(new_card.price)
+                new_card = Card.Card(item)
+                #pdb.set_trace()
+                #print(new_card.price)
+                cards.append(new_card)
+
         else:
             print("no luck")
 
