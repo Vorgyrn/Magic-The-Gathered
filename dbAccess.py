@@ -1,10 +1,12 @@
 from Card import Card
+from MassEntry import MassEntryFile
 
 import apsw
 import apsw.bestpractice
 
 apsw.bestpractice.apply(apsw.bestpractice.recommended)
 
+TYPES = ['Creature', "Planeswalker", "Artifact", "Land", "Battle", "Instant", 'Sorcery']
 import os
 from pdb import set_trace
 
@@ -39,7 +41,7 @@ CREATE TABLE collection (
 )
 '''
 DECKLIST_TABLE='''
-CREATE TABLE REPLACE_ME (
+CREATE TABLE REPLACE_ME_list (
     name TEXT NOT NULL,
     FOREIGN KEY (name)
     REFERENCES collection (name)
@@ -139,6 +141,15 @@ def search_for_db(path:str):
 
     return dbs
 
+def cardToEntry(card:Card, location=1):
+        pnt = []
+        if card.isCreature():
+            pnt = [card.power, card.toughness]
+        ret = (card.name, card.cmc, card.mana_cost, card.set_name, card.set_num,
+               card.type_line, card.rarity, card.price, *pnt, card.oracle_text,
+               location, card.loc_dets, int(card.foil), int(card.etched))
+        return ret
+
 class database:
     connection = None
 
@@ -163,8 +174,6 @@ class database:
         self.connection.pragma("foreign_keys", True)
         cursor = self.connection.cursor()
         cursor.execute(LOCATIONS_TABLE)
-        #query = "INSERT INTO locations (location) VALUES ('unknown');"
-        #cursor.execute(query)
         self.addLocation('unknown')
         cursor.execute(COLLECTION_TABLE)
         cursor.execute(DECKS_TABLE)
@@ -223,14 +232,28 @@ class database:
 
     def addDeck(self, name:str, commander:str, location=1, location_details=''):
         '''Add a deck to the decks table'''
+        
+        if name in self.getDeckNames():
+            print(f"A deck with name {name} already exists.")
+            return
+        
         cols = 'name, commander, location'
         vals = (name, commander, location)
+        qs = '?,?,?'
         if len(location_details) > 0:
             cols += ', location_details'
             vals = (name, commander, location, location_details)
-        query = f"INSERT INTO decks ({cols}) values(?)"
+            qs += ',?'
+        query = f"INSERT INTO decks ({cols}) values ({qs})"
         c = self.connection.cursor()
         c.execute(query, vals)
+        c.execute(DECKLIST_TABLE.replace('REPLACE_ME', name))        
+
+    def getDeckList(self, deckName):
+        query = f'''SELECT * FROM {deckName}_list'''
+        c = self.connection.cursor()
+        res = c.execute(query)
+        return res
 
     def addCard(self, card:Card):
         """Adds a new card card to the collection, if a deck is specified add
@@ -246,34 +269,35 @@ class database:
 
         loc_id = self.getLocationID(card.location)
         pnt = ""
-        q=""
         if card.isCreature():
-            pnt = 'power, toughness, '
-            q = "?,?,"
+            pnt = 'power, toughness,'
+
+        info = cardToEntry(card, loc_id)
+        qs = ','.join(['?' for i in range(len(info))])
         query = f"""INSERT INTO collection
                         (name, cmc, mana_cost, set_name, set_num, type,
                         rarity, price, {pnt}oracle, location, loc_details,
                         foil, etched)
                         VALUES
-                        (?,?,?,?,?,?,?,?,{q}?,?,?,?,?)"""
+                        ({qs})"""
         c = self.connection.cursor()
         c.execute(query, card.toDBFormat(loc_id))
 
-    def add_to_deck(self, card):
+    def addToDeck(self, card:Card):
+        # make a trigger or a call back to do averages of cmc and stuff
         pass
 
-    def remove_card(self, card):
+    def bulkAdd(self, path):
+        # accept a csv file
+        # read over csv file and add each card to collection and deck
+        [self.addCard(card) for card in MassEntryFile(path).getCards()]
+
+    def remove_card(self, card:Card):
         """Remove a number of cards from the collection, if the count hits 0 the
         entire entry will be deleted.
 
         Args:
-            name (str): name of card.
-            set (str): set of card.
-            num (int): set numbver of the card.
-            count (int): number to be removed.
-            location (str): locations to remove card from, will remove card
-            from deck lists if the location is a deck list.
-            foilType (str, optional): foil, nonfoil, etched or glossy. Defaults to 'nonfoil'.
+            card (Card): card object
         """
         pass
 
@@ -289,9 +313,48 @@ class database:
 
     def entry_to_card(self, entry):
         pass
+    
+    def getDeckNames(self):
+        c = self.connection.cursor()
+        query = f'''SELECT name FROM decks'''
+        res = c.execute(query).fetchall()
+        return [r[0] for r in res]
+    
+    def getDeckInfo(self, deckName):
+        
+        # this currently looks at info from the view. I will be moving on from
+        #  views and instead implimenting the deck_list table the way I already
+        #  designed it. THis time it will have 
+        c = self.connection.cursor()
+        query = f'''SELECT * FROM {deckName}'''
+        res = c.execute(query).fetchall()
+        for r in res:
+            print(r)
+            
+    # temporary testing funcS
+    def seeViews(self):
+        #query = '''SELECT name FROM sqlite_master WHERE type = "view" ''' #and sql LIKE "%_tablename_%"
+        query = '''PRAGMA table_list'''
+        c = self.connection.cursor()
+        res = c.execute(query).fetchall()
+        for r in res:
+            print(r)
+        
+    def seeTables(self):
+        query = """SELECT name FROM sqlite_master WHERE type = 'table'""" #and sql LIKE "%_tablename_%"
+        c = self.connection.cursor()
+        res = c.execute(query).fetchall()
+        for r in res:
+            print(r)
+            
+    def tableContents(self, tableName):
+        # locations collection decks
+        query = f"""SELECT * FROM {tableName}""" #and sql LIKE "%_tablename_%"
+        c = self.connection.cursor()
+        res = c.execute(query).fetchall()
+        for r in res:
+            print(r)
 
-
-    # temporary testing func
     def seeCollection(self):
         query = "SELECT * from collection;"
         c = self.connection.cursor()
@@ -301,18 +364,31 @@ class database:
 
 if __name__ == "__main__":
     a = 'rb1'
-    data={'name':'Kaalia', 'cmc':4, 'mana_cost':'1{b}{w}{r}', 'set_name':'c14',
+    '''data={'name':'Kaalia', 'cmc':4, 'mana_cost':'1{b}{w}{r}', 'set_name':'c14',
           'collector_number':1, 'type_line':'Lengendary Creature - Human Cleric',
           'rarity':'mythic', 'power':2, 'toughness':2, 'oracle_text':"Flying\n When this creature attacks put a demon, dragon, or angel onto the battlefield tapped and attacking.",
           'colors':'WBR', 'prices':{'usd_foil':40.00, 'usd_etched':50.90, 'usd':20.69},
-          'image_uris':'none'}
-    kaalia = Card()
-    kaalia.fromJson(data, location=a)
-    print(kaalia.location)
+          'image_uris':'none'} 
+    data={'name':'Avacyn', 'cmc':8, 'mana_cost':'5{w}{w}{w}', 'set_name':'AVC',
+          'collector_number':1, 'type_line':'Lengendary Creature - Angel',
+          'rarity':'mythic', 'power':8, 'toughness':8, 'oracle_text':"Flying\nIndestructible\nOther permanents yoc control have indestructible",
+          'colors':'W', 'prices':{'usd_foil':40.00, 'usd_etched':50.90, 'usd':30.00},
+          'image_uris':'none'} '''
+    #kaalia = Card(data, 'foil', a)
+    #kaalia.fromJson(data, location=a)
     db = database('db\\collection.db')
-    print(db.getLocations())
-    db.addCard(kaalia)
-    #print(db.getLocationID('rup'))
+    print(db.getDeckNames())
+    #print(db.getLocations())
+    #db.addCard(kaalia)
+    deck = ['WHite', 'Avacyn']
+    db.addDeck(*deck)
+    db.seeTables()
+    # db.tableContents('decks')
+    #db.tableContents('locations')
     db.seeCollection()
+    #db.getDeckInfo('DDA')
+    #lit = db.getDeckList('DDA')
+    #for l in lit: print(l)
+    #db.seeCollection()
 
 

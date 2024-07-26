@@ -1,8 +1,7 @@
+import Card
+from csv import reader
 from dataclasses import dataclass
 import os
-from csv import reader
-import Card
-import dbAccess
 import scryfall
 
 @dataclass
@@ -18,6 +17,7 @@ class MassEntryFile:
     """    
     cards = []
     SFAPI = scryfall.ScryFallAPI()
+    parsed=False
     def __init__(self, path):
         self.setNewFile(path)
     
@@ -26,6 +26,7 @@ class MassEntryFile:
             raise FileNotFoundError
         self.cards = []
         self.filename = path
+        self.parsed = False
         
     def respToCard(self, resp, info):
         # convert the card data gotten from the api
@@ -57,9 +58,18 @@ class MassEntryFile:
             read = reader(infile)
             for line in read:
                 self.cards.append(self.findCard(CardInfo(*line)))
-
+                
+        self.parsed = True
+    
+    def getCards(self):
+        if not self.parsed:
+            self.parseFile()
+        
+        return self.cards
+    
 if __name__ == "__main__":
     file = 'test.csv'
     mass = MassEntryFile(file)
-    mass.parseFile()
-    print(mass.cards)
+    cards = mass.getCards()
+    for c in cards:
+        print(c.location)
